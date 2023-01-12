@@ -1,2 +1,0 @@
-
-        minNeighbors=5,     

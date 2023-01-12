@@ -1,34 +1,27 @@
-import cv2
-import os
+from cam import IPCam, IPFeed
+
+#example usage
+def main():
+    f = IPFeed()
+    c = IPCam()
+
+    while True:
+        center = f.get_face_center()
+        rel_pos = f.get_relative_pos(center)
+        x_diff = 0.5 - rel_pos[0]
+        y_diff = 0.5 - rel_pos[1]
+        pan = 0
+        tilt = 0
+        if x_diff < -0.1:
+            pan = 0.005
+        elif x_diff > 0.1:
+            pan = -0.005
+        if y_diff < -0.1:
+            tilt = -0.005
+        elif y_diff > 0.1:
+            tilt = 0.005
+        c.relative_move(pan, tilt, 0)
 
 
-cascPath=os.path.dirname(cv2.__file__)+"/data/haarcascade_frontalface_default.xml"
-faceCascade = cv2.CascadeClassifier(cascPath)
-
-print("before url")
-cap = cv2.VideoCapture('rtsp://admin:iotcamera1@192.168.1.209:554/cam/realmonitor?channel=1&subtype=0')
-print("after url")
-
-while(True):
-    ret, img = cap.read()
-    img = cv2.flip(img, -1)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    
-    faces = faceCascade.detectMultiScale(
-        gray,     
-        scaleFactor=1.2,
-        minNeighbors=5,     
-        minSize=(20, 20)
-    )
-    for (x,y,w,h) in faces:
-        cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
-        roi_gray = gray[y:y+h, x:x+w]
-        roi_color = img[y:y+h, x:x+w]  
-    cv2.imshow('video',img)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-    ret = cap.grab()
-
-
-cap.release()
-cv2.destroyAllWindows()
+if __name__ == '__main__':
+    main()
